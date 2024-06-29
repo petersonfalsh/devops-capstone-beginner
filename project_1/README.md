@@ -1,68 +1,62 @@
 
 
-### Project 1: Containerizing Applications with Docker
-
-## README.md
-
 ```markdown
 # Project 1: Containerizing Applications with Docker
 
 ## Overview
-This project involves creating, managing, and deploying Docker containers for a Node.js web application. The goal is to ensure consistent and efficient application environments using Docker.
+This project demonstrates how to create, manage, and deploy Docker containers for consistent and efficient application environments. The example application is a simple Node.js web server.
 
 ## Prerequisites
-- Docker installed on your local machine
-- Basic knowledge of Docker and Node.js
+- Docker installed on your local machine or server
+- Node.js installed on your local machine for development
 
 ## Setup Instructions
 
 ### Step 1: Install Docker
-**On Ubuntu:**
+
+**For Ubuntu:**
 ```bash
 sudo apt update
-sudo apt install docker.io -y
-sudo systemctl start docker
-sudo systemctl enable docker
+sudo apt install apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+sudo apt update
+sudo apt install docker-ce
+sudo systemctl status docker
 ```
 
-**On macOS:**
-- Download and install Docker Desktop from [Docker's official website](https://www.docker.com/products/docker-desktop).
+### Step 2: Write Dockerfiles
 
-**On Windows:**
-- Download and install Docker Desktop from [Docker's official website](https://www.docker.com/products/docker-desktop).
-
-### Step 2: Create a Dockerfile
-Create a file named `Dockerfile` with the following content:
-```dockerfile
-# Use the nodejs environment but with alpine to make it light-weight
-FROM node:alpine
-
-# Create and set the working directory in the container
-WORKDIR /usr/src/app
-
-# Copy the package.json and package-lock.json file from the local machine to the container
-COPY package*.json ./
-
-# Install the dependencies in the container
-RUN npm install
-
-# Copy the rest of the application code from the local machine to the container
-COPY . .
-
-# Expose the application port
-EXPOSE 3000
-
-# Specify the command to run the application
-CMD ["npm", "start"]
+1. **Create a directory for your application:**
+```bash
+mkdir mynodeapp
+cd mynodeapp
 ```
 
-### Step 3: Create the Node.js Application
+2. **Create a simple Node.js application:**
 
-#### package.json
-Create a file named `package.json` with the following content:
+**app.js:**
+```javascript
+
+const express = require("express");
+const app = express();
+const port = 3000;
+
+app.get("/", (req, res) => {
+    res.send('Hello, world... This is my simple web application for  my capstone project!')
+})
+
+app.listen(port, () => {
+    console.log("Listening for request at port " + port)
+})
+
+
+```
+
+**package.json:**
 ```json
 {
-  "name": "my_node_app",
+  "name": "mynodeapp",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
@@ -79,112 +73,98 @@ Create a file named `package.json` with the following content:
 }
 ```
 
-#### app.js
-Create a file named `app.js` with the following content:
-```javascript
-const express = require("express");
-const app = express();
-const port = 3000;
+3. **Create a Dockerfile:**
 
-app.get("/", (req, res) => {
-    res.send('Hello, world... This is my simple web application for my capstone project!')
-})
+**Dockerfile:**
+```Dockerfile
+## Use the nodejs environment but with alpine to make it light-weight
+FROM node:alpine
 
-app.listen(port, () => {
-    console.log("Listening for request at port " + port)
-})
+# Create and set the working directory in the container that will be created
+# and change to the working directory.  you can use just /app but /usr/src/app
+# because it's a common convention from the Linux/unix days as where code s served from.
+# NOTE - when you use the WORKDIR directory, you have switched o the directory.
+WORKDIR /usr/src/app
+
+# copy the package.json and package-lock.json file in my local machine to the current working
+# directory which is /usr/src/app
+COPY package*.json ./
+
+# Install the dependencies in the current working directory in the container
+RUN npm install
+
+#  copy the rest of the application code from my local machine to the container's CWD
+COPY . .
+
+# Expose the application port
+EXPOSE 3000
+
+#Specify the command to run the application
+CMD ["npm", "start"]
 ```
 
-### Step 4: Build the Docker Image
-Build the Docker image from the Dockerfile:
+### Step 3: Build Docker images from the Dockerfiles
+
 ```bash
-docker build -t my_node_app .
+docker build -t mynodeapp .
 ```
 
-### Step 5: Run the Docker Container
-Run the Docker container from the image you built:
+### Step 4: Push the Docker images to a container registry
+
+1. **Log in to Docker Hub:**
 ```bash
-docker run -p 3000:3000 my_node_app
+docker login
 ```
 
-### Step 6: Push the Docker Image to Docker Hub
-1. Log in to Docker Hub:
-    ```bash
-    docker login
-    ```
+2. **Tag the Docker image:**
+```bash
+docker tag mynodeapp your-dockerhub-username/mynodeapp
+```
 
-2. Tag the Docker image:
-    ```bash
-    docker tag my_node_app your_dockerhub_username/my_node_app
-    ```
+3. **Push the Docker image:**
+```bash
+docker push your-dockerhub-username/mynodeapp
+```
 
-3. Push the Docker image to Docker Hub:
-    ```bash
-    docker push your_dockerhub_username/my_node_app
-    ```
+## Running the Application
 
-## Verifying the Deployment
-1. After running the Docker container, open a web browser and navigate to `http://localhost:3000`.
-2. You should see the message: "Hello, world... This is my simple web application for my capstone project!"
+1. **Run the Docker container:**
+```bash
+docker run -p 3000:3000 your-dockerhub-username/mynodeapp
+```
+
+2. **Open your browser and navigate to:**
+```
+http://localhost:3000
+```
+You should see "Hello, world... This is my simple web application for my capstone project!" displayed.
 
 ## Dependencies
 
 - Docker
 - Node.js
-- Express (installed via `npm`)
-
-### Installation Instructions for Dependencies
-
-**Node.js and npm:**
-
-**On Ubuntu:**
-```bash
-sudo apt update
-sudo apt install nodejs npm -y
-```
-
-**On macOS:**
-- Install Homebrew if you haven't already:
-    ```bash
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    ```
-
-- Then install Node.js:
-    ```bash
-    brew install node
-    ```
-
-**On Windows:**
-- Download and install Node.js from [Node.js official website](https://nodejs.org/).
 
 ## Maintenance and Extension Instructions
 
 ### Maintenance
-
-- Regularly update the Dockerfile and application dependencies.
-- Monitor the container performance and logs.
+- Regularly update the Node.js version in the Dockerfile to the latest stable version.
+- Update the dependencies in `package.json` periodically.
 
 ### Extension
-
-- Extend the application with more routes and features.
-- Add environment variables for configuration.
-- Implement Docker Compose for multi-container applications.
+- Add more functionality to the Node.js application.
+- Use a multi-stage Docker build for optimized image sizes.
+- Integrate with a CI/CD pipeline for automated builds and deployments when you learn about it.
 
 ## Diagrams and Screenshots
 
 ### Diagram
-
-![Docker Workflow](path/to/diagram.png)
+![Docker Architecture](path/to/diagram.png)
 
 ### Screenshots
+**Building Docker Image:**
+![Building Image](path/to/screenshot1.png)
 
-**Docker Build:**
-
-![Docker Build](path/to/screenshot1.png)
-
-**Application Running in Docker:**
-
-![Application Running](path/to/screenshot2.png)
+**Running Docker Container:**
+![Running Container](path/to/screenshot2.png)
 ```
-
-Would you like to proceed with any further actions or modifications?
+```

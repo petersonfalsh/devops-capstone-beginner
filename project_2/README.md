@@ -1,188 +1,156 @@
-### Project 2: Infrastructure as Code with Terraform
-
-## README.md
-
 ```markdown
 # Project 2: Infrastructure as Code with Terraform
 
 ## Overview
-This project demonstrates how to manage infrastructure using Terraform to achieve consistent and reproducible environments. The goal is to develop an EC2 instance with a default VPC using Terraform and deploy the infrastructure using GitHub Actions.
+This project demonstrates how to manage infrastructure using Terraform to achieve consistent and reproducible environments. This documentation aims to develop an EC2 instance with a default VPC using Terraform and deploy the infrastructure using GitHub Actions.
 
 ## Prerequisites
 - Terraform installed on your local machine
-- AWS account and IAM user with appropriate permissions
-- GitHub account
+- AWS account with access keys
 
 ## Setup Instructions
 
 ### Step 1: Install Terraform
 
-**On Ubuntu:**
+**For Ubuntu:**
 ```bash
-sudo apt-get update
-sudo apt-get install -y gnupg software-properties-common curl
+sudo apt-get update && sudo apt-get install -y gnupg software-properties-common curl
 curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
 sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-sudo apt-get update
-sudo apt-get install terraform
+sudo apt-get update && sudo apt-get install terraform
 ```
-
-**On macOS:**
-```bash
-brew tap hashicorp/tap
-brew install hashicorp/tap/terraform
-```
-
-**On Windows:**
-- Download the appropriate package from the [Terraform website](https://www.terraform.io/downloads.html) and follow the installation instructions.
 
 ### Step 2: Create Terraform Configuration Files
 
-1. Create a directory for your project and navigate into it:
-   ```bash
-   mkdir my-terraform-project
-   cd my-terraform-project
-   ```
+1. **Create a directory for your Terraform configuration:**
+```bash
+mkdir myterraformproject
+cd myterraformproject
+```
 
-2. Create a `main.tf` file to define your infrastructure resources:
-   ```hcl
-   provider "aws" {
-     region = "us-west-2"
-   }
+2. **Create the main Terraform configuration file:**
 
-   resource "aws_instance" "example" {
-     ami           = "ami-0c55b159cbfafe1f0"
-     instance_type = "t2.micro"
+**main.tf:**
+```hcl
+provider "aws" {
+  region = "us-west-2"
+}
 
-     tags = {
-       Name = "TerraformExample"
-     }
+resource "aws_instance" "example" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
 
-     user_data = <<-EOF
-                 #!/bin/bash
-                 sudo apt-get update
-                 sudo apt-get install -y docker.io
-                 sudo systemctl start docker
-                 sudo systemctl enable docker
-                 docker run -d -p 80:80 nginx
-                 EOF
-   }
-   ```
+  tags = {
+    Name = "example-instance"
+  }
+}
+```
 
-3. Initialize Terraform:
-   ```bash
-   terraform init
-   ```
+**variables.tf:**
+```hcl
+variable "aws_access_key" {
+  description = "AWS Access Key"
+}
 
-4. Create a Terraform execution plan:
-   ```bash
-   terraform plan
-   ```
+variable "aws_secret_key" {
+  description = "AWS Secret Key"
+}
 
-5. Apply the Terraform configuration:
-   ```bash
-   terraform apply
-   ```
+provider "aws" {
+  region     = "us-west-2"
+  access_key = var.aws_access_key
+  secret_key = var.aws_secret_key
+}
 
-### Step 3: Deploy Infrastructure using GitHub Actions
+resource "aws_instance" "example" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
 
-1. Create a new repository on GitHub for your project.
+  tags = {
+    Name = "example-instance"
+  }
+}
+```
 
-2. Add your Terraform configuration files to the repository.
+### Step 3: Use Terraform Commands to Provision Infrastructure
 
-3. Create a GitHub Actions workflow file in `.github/workflows/terraform-pipeline.yml`:
-   ```yaml
-   name: 'Terraform CI/CD'
+1. **Initialize Terraform:**
+```bash
+terraform init
+```
 
-   on:
-     push:
-       branches:
-         - main
+2. **Plan the infrastructure:**
+```bash
+terraform plan
+```
 
-   jobs:
-     terraform:
-       runs-on: ubuntu-latest
+3. **Apply the configuration to create the infrastructure:**
+```bash
+terraform apply
+```
 
-       steps:
-         - name: Checkout code
-           uses: actions/checkout@v2
+### Step 4: Write a Userdata Script for Docker Installation and Application Deployment
 
-         - name: Setup Terraform
-           uses: hashicorp/setup-terraform@v1
-           with:
-             terraform_version: 1.0.5
+**main.tf:**
+```hcl
+provider "aws" {
+  region = "us-west-2"
+}
 
-         - name: Terraform Init
-           run: terraform init
+resource "aws_instance" "example" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
 
-         - name: Terraform Plan
-           run: terraform plan
+  user_data = <<-EOF
+              #!/bin/bash
+              sudo apt-get update
+              sudo apt-get install -y docker.io
+              sudo systemctl start docker
+              sudo systemctl enable docker
+              sudo docker run -d -p 80:80 your-dockerhub-username/mynodeapp
+              EOF
 
-         - name: Terraform Apply
-           run: terraform apply -auto-approve
-   ```
+  tags = {
+    Name = "example-instance"
+  }
+}
+```
 
-4. Commit and push your changes to GitHub.
+## Running the Infrastructure
 
-### Step 4: Verify the Infrastructure Deployment
+1. **Run the Terraform commands to provision the infrastructure:**
+```bash
+terraform init
+terraform plan
+terraform apply
+```
 
-1. Check the GitHub Actions workflow runs in your repository to ensure the Terraform apply step completed successfully.
-
-2. Log in to your AWS Management Console and navigate to the EC2 Dashboard.
-
-3. Verify that a new EC2 instance with the specified configuration is running.
+2. **Verify that the EC2 instance is running and Docker is installed:**
+   - SSH into the EC2 instance.
+   - Run `docker ps` to see if the application container is running.
 
 ## Dependencies
 
 - Terraform
-- AWS CLI (optional for local testing)
-- GitHub Actions
-
-### Installation Instructions for Dependencies
-
-**AWS CLI:**
-
-**On Ubuntu:**
-```bash
-sudo apt-get update
-sudo apt-get install awscli -y
-```
-
-**On macOS:**
-```bash
-brew install awscli
-```
-
-**On Windows:**
-- Download and install the AWS CLI from the [official website](https://aws.amazon.com/cli/).
+- AWS CLI
 
 ## Maintenance and Extension Instructions
 
-### Maintenance
+### Maintenance 
+- Regularly update the AMI ID in the Terraform configuration to the latest stable version.
+- Update the Docker image in the userdata script as necessary.
 
-- Regularly update Terraform to the latest version.
-- Monitor the deployed infrastructure for performance and security.
-
-### Extension
-
-- Add more Terraform configuration files to manage additional resources like S3, RDS, etc.
-- Integrate with other CI/CD tools and workflows.
 
 ## Diagrams and Screenshots
 
 ### Diagram
-
-![Terraform Infrastructure Workflow](path/to/diagram.png)
+![Terraform Architecture](path/to/diagram.png)
 
 ### Screenshots
+**Terraform Plan:**
+![Terraform Plan](path/to/screenshot1.png)
 
-**Terraform Apply:**
-
-![Terraform Apply](path/to/screenshot1.png)
-
-**EC2 Instance in AWS Console:**
-
+**EC2 Instance Running:**
 ![EC2 Instance](path/to/screenshot2.png)
 ```
-
-Would you like to proceed with the next project?
+```

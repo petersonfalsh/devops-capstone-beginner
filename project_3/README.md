@@ -1,208 +1,123 @@
-### Project 3: Automated Deployment Pipeline with GitHub Actions
-
-## README.md
 
 ```markdown
 # Project 3: Automated Deployment Pipeline with GitHub Actions
 
 ## Overview
-This project involves setting up a comprehensive CI/CD pipeline using GitHub Actions to automate the deployment of infrastructure to AWS using Terraform. This ensures a consistent, reproducible, and automated deployment process.
+This project sets up a comprehensive CI/CD pipeline using GitHub Actions to automate our infrastructure deployment to AWS.
 
 ## Prerequisites
-- GitHub account
-- AWS account and IAM user with appropriate permissions
-- Terraform installed on your local machine
-- A GitHub repository for your project
+- A GitHub account
+- AWS account with access keys
+- Terraform configuration files for the infrastructure
 
 ## Setup Instructions
 
-### Step 1: Create a Repository on GitHub
-1. Go to [GitHub](https://github.com/) and log in to your account.
-2. Click on the "+" icon at the top right and select "New repository".
-3. Enter a name for your repository, make it public or private, and click "Create repository".
+### Step 1: Create a GitHub Repository
 
-### Step 2: Add Terraform Configuration Files
+1. Go to GitHub and create a new repository (e.g., `terraform-deployment`).
 
-1. Clone your repository to your local machine:
-   ```bash
-   git clone https://github.com/your-username/your-repository.git
-   cd your-repository
-   ```
+### Step 2: Create a GitHub Actions Workflow File
 
-2. Create a `main.tf` file to define your infrastructure resources:
-   ```hcl
-   provider "aws" {
-     region = "us-west-2"
-   }
+1. In your local project directory, create the necessary folders and workflow file:
+```bash
+mkdir -p .github/workflows
+touch .github/workflows/terraform-pipeline.yml
+```
 
-   resource "aws_instance" "example" {
-     ami           = "ami-0c55b159cbfafe1f0"
-     instance_type = "t2.micro"
+2. Populate the `terraform-pipeline.yml` file with the following content:
 
-     tags = {
-       Name = "TerraformExample"
-     }
+```yaml
+name: Terraform Deployment
 
-     user_data = <<-EOF
-                 #!/bin/bash
-                 sudo apt-get update
-                 sudo apt-get install -y docker.io
-                 sudo systemctl start docker
-                 sudo systemctl enable docker
-                 docker run -d -p 80:80 nginx
-                 EOF
-   }
-   ```
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
-3. Initialize Terraform:
-   ```bash
-   terraform init
-   ```
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
 
-4. Create a Terraform execution plan:
-   ```bash
-   terraform plan
-   ```
+    env:
+      TF_VERSION: '1.0.0'
+      TF_WORKING_DIR: './'
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-5. Apply the Terraform configuration locally (optional for testing):
-   ```bash
-   terraform apply
-   ```
+    steps:
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@v2
 
-### Step 3: Create a GitHub Actions Workflow File
+    - name: 'Setup Terraform'
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
 
-1. Create a directory for your GitHub Actions workflows:
-   ```bash
-   mkdir -p .github/workflows
-   ```
+    - name: 'Terraform Init'
+      run: terraform init
+      working-directory: ${{ env.TF_WORKING_DIR }}
 
-2. Create a workflow file in `.github/workflows/terraform-pipeline.yml`:
-   ```yaml
-   name: 'Terraform CI/CD'
+    - name: 'Terraform Plan'
+      run: terraform plan -out=tfplan
+      working-directory: ${{ env.TF_WORKING_DIR }}
 
-   on:
-     push:
-       branches:
-         - main
+    - name: 'Terraform Apply'
+      if: github.ref == 'refs/heads/main'
+      run: terraform apply -input=false tfplan
+      working-directory: ${{ env.TF_WORKING_DIR }}
+```
 
-   jobs:
-     terraform:
-       runs-on: ubuntu-latest
+### Step 3: Configure the Workflow
 
-       steps:
-         - name: Checkout code
-           uses: actions/checkout@v2
+- The workflow triggers on `push` and `pull_request` events on the `main` branch.
 
-         - name: Setup Terraform
-           uses: hashicorp/setup-terraform@v1
-           with:
-             terraform_version: 1.0.5
+### Step 4: Add Steps to the Workflow
 
-         - name: Terraform Init
-           run: terraform init
+- Steps include checking out the code, setting up Terraform, and initializing it.
 
-         - name: Terraform Plan
-           run: terraform plan
+### Step 5: Add Build Steps
 
-         - name: Terraform Apply
-           run: terraform apply -auto-approve
-   ```
+- The build steps include `terraform init`, `terraform plan`, and `terraform apply`.
 
-3. Commit and push your changes to GitHub:
-   ```bash
-   git add .
-   git commit -m "Add Terraform configuration and GitHub Actions workflow"
-   git push origin main
-   ```
+### Step 6: Add Build Parameters
 
-### Step 4: Configure GitHub Secrets
+- The `terraform apply` step runs only when the event is a push to the `main` branch.
 
-1. Go to your repository on GitHub.
-2. Click on "Settings" > "Secrets" > "Actions" > "New repository secret".
-3. Add the following secrets:
-   - `AWS_ACCESS_KEY_ID`
-   - `AWS_SECRET_ACCESS_KEY`
+### Step 7: Validate the Workflow
 
-### Step 5: Verify the Automated Pipeline
-
-1. Make a change to your repository (e.g., update `main.tf`) and push the changes.
-2. Go to the "Actions" tab in your GitHub repository.
-3. Observe the workflow execution and verify that the infrastructure is deployed successfully.
+- Commit and push your changes to the `main` branch.
+- Observe the workflow execution in the Actions tab of your GitHub repository.
 
 ## Dependencies
 
 - Terraform
-- AWS CLI (optional for local testing)
-- GitHub Actions
-
-### Installation Instructions for Dependencies
-
-**Terraform:**
-
-**On Ubuntu:**
-```bash
-sudo apt-get update
-sudo apt-get install -y gnupg software-properties-common curl
-curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-sudo apt-get update
-sudo apt-get install terraform
-```
-
-**On macOS:**
-```bash
-brew tap hashicorp/tap
-brew install hashicorp/tap/terraform
-```
-
-**On Windows:**
-- Download the appropriate package from the [Terraform website](https://www.terraform.io/downloads.html) and follow the installation instructions.
-
-**AWS CLI:**
-
-**On Ubuntu:**
-```bash
-sudo apt-get update
-sudo apt-get install awscli -y
-```
-
-**On macOS:**
-```bash
-brew install awscli
-```
-
-**On Windows:**
-- Download and install the AWS CLI from the [official website](https://aws.amazon.com/cli/).
+- AWS CLI
 
 ## Maintenance and Extension Instructions
 
 ### Maintenance
-
-- Regularly update Terraform and GitHub Actions to the latest versions.
-- Monitor the deployed infrastructure for performance and security.
+- Regularly update the Terraform version in the workflow file.
+- Update the AWS access keys in the GitHub repository secrets as needed.
 
 ### Extension
-
-- Add more Terraform configuration files to manage additional resources like S3, RDS, etc.
-- Integrate with other CI/CD tools and workflows.
-- Enhance the GitHub Actions workflow with additional checks and notifications.
+- Add more steps to the workflow, such as running tests or sending notifications as your project later demands.
+- Integrate with other CI/CD tools and services for enhanced functionality.
 
 ## Diagrams and Screenshots
 
 ### Diagram
-
-![GitHub Actions Workflow](path/to/diagram.png)
+![CI/CD Pipeline](path/to/diagram.png)
 
 ### Screenshots
-
 **GitHub Actions Workflow:**
+![GitHub Actions](path/to/screenshot1.png)
 
-![GitHub Actions Workflow](path/to/screenshot1.png)
-
-**EC2 Instance in AWS Console:**
-
-![EC2 Instance](path/to/screenshot2.png)
+**Terraform Apply:**
+![Terraform Apply](path/to/screenshot2.png)
 ```
-
-Would you like to proceed with the next project?
+```
 
