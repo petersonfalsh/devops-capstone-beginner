@@ -2,7 +2,7 @@
 
 # This is a documentation of my capstone project as a beginner in DevOps courtesy of Kodehauz.
 
-```markdown
+
 # Project 1: Containerizing Applications with Docker
 
 ## Overview
@@ -157,24 +157,9 @@ You should see "Hello, world... This is my simple web application for my capston
 - Use a multi-stage Docker build for optimized image sizes.
 - Integrate with a CI/CD pipeline for automated builds and deployments when you learn about it.
 
-## Diagrams and Screenshots
-
-### Diagram
-![Docker Architecture](path/to/diagram.png)
-
-### Screenshots
-**Building Docker Image:**
-![Building Image](path/to/screenshot1.png)
-
-**Running Docker Container:**
-![Running Container](path/to/screenshot2.png)
-```
-```
 
 
 
-
-```markdown
 # Project 2: Infrastructure as Code with Terraform
 
 ## Overview
@@ -317,26 +302,9 @@ terraform apply
 - Update the Docker image in the userdata script as necessary.
 
 
-## Diagrams and Screenshots
-
-### Diagram
-![Terraform Architecture](path/to/diagram.png)
-
-### Screenshots
-**Terraform Plan:**
-![Terraform Plan](path/to/screenshot1.png)
-
-**EC2 Instance Running:**
-![EC2 Instance](path/to/screenshot2.png)
-```
-```
 
 
 
-
-
-
-```markdown
 # Project 3: Automated Deployment Pipeline with GitHub Actions
 
 ## Overview
@@ -444,24 +412,9 @@ jobs:
 - Add more steps to the workflow, such as running tests or sending notifications as your project later demands.
 - Integrate with other CI/CD tools and services for enhanced functionality.
 
-## Diagrams and Screenshots
-
-### Diagram
-![CI/CD Pipeline](path/to/diagram.png)
-
-### Screenshots
-**GitHub Actions Workflow:**
-![GitHub Actions](path/to/screenshot1.png)
-
-**Terraform Apply:**
-![Terraform Apply](path/to/screenshot2.png)
-```
-```
 
 
 
-
-```markdown
 # Project 4: Ansible Task to Deploy Nginx
 
 ## Overview
@@ -560,22 +513,7 @@ sudo apt install ansible
 - Add more tasks to the playbook, such as configuring Nginx with custom settings.
 - Use roles and templates to organize the playbook for more complex deployments.
 
-## Diagrams and Screenshots
 
-### Diagram
-
-![Ansible Deployment Diagram](path/to/diagram.png)
-
-### Screenshots
-
-**Playbook Execution:**
-
-![Playbook Execution](path/to/screenshot1.png)
-
-**Nginx Welcome Page:**
-
-![Nginx Welcome Page](path/to/screenshot2.png)
-```
 
 
 

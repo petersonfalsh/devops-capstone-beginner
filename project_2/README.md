@@ -1,4 +1,5 @@
-```markdown
+
+
 # Project 2: Infrastructure as Code with Terraform
 
 ## Overview
@@ -141,16 +142,3 @@ terraform apply
 - Update the Docker image in the userdata script as necessary.
 
 
-## Diagrams and Screenshots
-
-### Diagram
-![Terraform Architecture](path/to/diagram.png)
-
-### Screenshots
-**Terraform Plan:**
-![Terraform Plan](path/to/screenshot1.png)
-
-**EC2 Instance Running:**
-![EC2 Instance](path/to/screenshot2.png)
-```
-```

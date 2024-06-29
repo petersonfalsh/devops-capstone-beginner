@@ -1,5 +1,6 @@
 
-```markdown
+
+
 # Project 3: Automated Deployment Pipeline with GitHub Actions
 
 ## Overview
@@ -112,12 +113,4 @@ jobs:
 ### Diagram
 ![CI/CD Pipeline](path/to/diagram.png)
 
-### Screenshots
-**GitHub Actions Workflow:**
-![GitHub Actions](path/to/screenshot1.png)
-
-**Terraform Apply:**
-![Terraform Apply](path/to/screenshot2.png)
-```
-```
 

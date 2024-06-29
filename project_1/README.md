@@ -1,6 +1,6 @@
 
 
-```markdown
+
 # Project 1: Containerizing Applications with Docker
 
 ## Overview
@@ -155,16 +155,3 @@ You should see "Hello, world... This is my simple web application for my capston
 - Use a multi-stage Docker build for optimized image sizes.
 - Integrate with a CI/CD pipeline for automated builds and deployments when you learn about it.
 
-## Diagrams and Screenshots
-
-### Diagram
-![Docker Architecture](path/to/diagram.png)
-
-### Screenshots
-**Building Docker Image:**
-![Building Image](path/to/screenshot1.png)
-
-**Running Docker Container:**
-![Running Container](path/to/screenshot2.png)
-```
-```
